@@ -195,7 +195,7 @@ impl AztecWriter {
     fn fill(&mut self, bitstr: &[bool]) {
         let mut idx = self.current_domino;
         for &bit in bitstr {
-            let mut domino = &mut self.dominos[idx];
+            let domino = &mut self.dominos[idx];
             if self.current_bit {
                 domino.tail = bit;
                 idx += 1;
