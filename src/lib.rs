@@ -8,6 +8,8 @@ pub mod writer;
 #[allow(warnings)] // TODO: Remove me when reader is operational
 pub mod reader;
 pub mod reed_solomon;
+#[cfg(feature = "python")]
+mod python;
 
 use std::ops::{Index, IndexMut};
 use std::fmt::Display;

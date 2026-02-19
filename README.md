@@ -49,3 +49,99 @@ please open an issue so I can look into it.
 
 - Implement an Aztec code reader
 - Improve speed of big Aztec Code generation
+
+# Build Python3 bindings using PyO3 and maturin with Docker for Armhf (32-bit ARM):
+
+## first step: build the docker image (only needed once):
+
+```bash
+docker build --no-cache -f Dockerfile.armhf -t raztec-armhf .
+```
+## second step: build the Python3 bindings:
+
+```bash
+docker run --rm -v $(pwd)/dist:/build/dist raztec-armhf
+```
+
+After running the above command, you should find the generated Python wheel file in the `dist` directory. You can then install it using pip:
+
+```bash
+pip install dist/raztec-*.whl
+```
+
+## Example usage of the Python3 bindings:
+
+
+
+```python3
+from raztec import AztecCodeBuilder                                                                                                                                                                                              
+                                                                                                                                                                                                                               
+builder = AztecCodeBuilder()                                                                                                                                                                                                     
+builder.append("Hello World")                                                                                                                                                                                                    
+code = builder.build()
+
+print(code)          # print the Aztec code in the terminal
+print(code.size())   # Module Size (z.B. 15)
+print(code.is_compact())  # True für kompakte Codes
+```
+
+
+With custom error correction rate:
+```python3
+from raztec import AztecCodeBuilder
+
+builder = AztecCodeBuilder()
+builder.error_correction(33)  # 33% instead default 23%
+builder.append("Hello World")
+code = builder.build()
+
+print(code)          # print the Aztec code in the terminal
+print(code.size())   # Module Size (z.B. 15)
+print(code.is_compact())  # True für kompakte Codes
+```
+
+Using Binary data:
+
+```python3
+from raztec import AztecCodeBuilder
+
+builder = AztecCodeBuilder()
+builder.error_correction(33)  # 33% statt default 23%
+builder.append_bytes(b"\x01\x02\x03")
+code = builder.build()
+
+print(code)          # print the Aztec code in the terminal
+print(code.size())   # Module Size (z.B. 15)
+print(code.is_compact())  # True if compact code
+```
+
+Aztec Rune (single byte):
+
+```python3
+from raztec import rune
+
+code = rune(42)
+print(code)
+```
+
+Save Aztec code as Image (with Pillow):
+
+```python3
+from PIL import Image
+from raztec import AztecCodeBuilder
+
+builder = AztecCodeBuilder()
+builder.append("Hello World")
+code = builder.build()
+
+module_size = 4  # Pixel/Module
+pixels = code.to_mono8(module_size)
+img_size = code.size() * module_size
+
+img = Image.frombytes("L", (img_size, img_size), bytes(pixels))
+img.save("aztec.png")
+```
+
+With the `to_mono8()` method, you can get the pixel data as a list of grayscale values (0=black, 255=white). 
+The `to_rgb8()` method provides RGB values as a list of u32 integers.
+
